@@ -10,6 +10,21 @@ if TYPE_CHECKING:
 class ServiceSession(metaclass=ABCMeta):
     """The Service Session Base Class."""
 
+    @property
+    @abstractmethod
+    def cookies(self) -> Any:
+        ...
+
+    @property
+    @abstractmethod
+    def headers(self) -> Any:
+        ...
+
+    @property
+    @abstractmethod
+    def proxies(self) -> Any:
+        ...
+
     @abstractmethod
     def get(self, url: Union[str, bytes], **kwargs: Any) -> Any:
         ...
@@ -44,6 +59,18 @@ class RequestsSession(ServiceSession):
 
     def __init__(self, session: requests.Session):
         self.session = session or requests.Session()
+
+    @property
+    def cookies(self) -> Any:
+        return self.session.cookies
+
+    @property
+    def headers(self) -> Any:
+        return self.session.headers
+
+    @property
+    def proxies(self) -> Any:
+        return self.session.proxies
 
     def get(self, url: Union[str, bytes], **kwargs: Any) -> Any:
         return self.session.get(url, **kwargs)
