@@ -20,19 +20,19 @@ from langcodes import Language, tag_is_valid
 from m3u8 import M3U8
 from pywidevine.cdm import Cdm as WidevineCdm
 from pywidevine.pssh import PSSH
-from requests import Session
 from rich import filesize
 
 from devine.core.constants import AnyTrack
 from devine.core.downloaders import downloader
 from devine.core.downloaders import requests as requests_downloader
 from devine.core.drm import DRM_T, ClearKey, Widevine
+from devine.core.sessions import RequestsSession, ServiceSession
 from devine.core.tracks import Audio, Subtitle, Tracks, Video
 from devine.core.utilities import is_close_match, try_ensure_utf8
 
 
 class HLS:
-    def __init__(self, manifest: M3U8, session: Optional[Session] = None):
+    def __init__(self, manifest: M3U8, session: Optional[ServiceSession] = None):
         if not manifest:
             raise ValueError("HLS manifest must be provided.")
         if not isinstance(manifest, M3U8):
@@ -41,19 +41,19 @@ class HLS:
             raise ValueError("Expected the M3U(8) manifest to be a Variant Playlist.")
 
         self.manifest = manifest
-        self.session = session or Session()
+        self.session = session or RequestsSession()
 
     @classmethod
-    def from_url(cls, url: str, session: Optional[Session] = None, **args: Any) -> HLS:
+    def from_url(cls, url: str, session: Optional[ServiceSession] = None, **args: Any) -> HLS:
         if not url:
             raise requests.URLRequired("HLS manifest URL must be provided.")
         if not isinstance(url, str):
             raise TypeError(f"Expected url to be a {str}, not {url!r}")
 
         if not session:
-            session = Session()
-        elif not isinstance(session, Session):
-            raise TypeError(f"Expected session to be a {Session}, not {session!r}")
+            session = RequestsSession()
+        elif not isinstance(session, ServiceSession):
+            raise TypeError(f"Expected session to be a {ServiceSession}, not {session!r}")
 
         res = session.get(url, **args)
         if not res.ok:
@@ -193,14 +193,14 @@ class HLS:
         stop_event: Event,
         skip_event: Event,
         progress: partial,
-        session: Optional[Session] = None,
+        session: Optional[ServiceSession] = None,
         proxy: Optional[str] = None,
         license_widevine: Optional[Callable] = None
     ) -> None:
         if not session:
-            session = Session()
-        elif not isinstance(session, Session):
-            raise TypeError(f"Expected session to be a {Session}, not {session!r}")
+            session = RequestsSession()
+        elif not isinstance(session, ServiceSession):
+            raise TypeError(f"Expected session to be a {ServiceSession}, not {session!r}")
 
         if not track.needs_proxy and proxy:
             proxy = None
@@ -336,7 +336,7 @@ class HLS:
         range_offset: Queue,
         drm_lock: Lock,
         license_widevine: Optional[Callable] = None,
-        session: Optional[Session] = None,
+        session: Optional[ServiceSession] = None,
         proxy: Optional[str] = None,
         stop_event: Optional[Event] = None,
         skip_event: Optional[Event] = None

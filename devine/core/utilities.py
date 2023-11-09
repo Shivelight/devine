@@ -15,7 +15,6 @@ from urllib.parse import urlparse
 
 import chardet
 import pproxy
-import requests
 from construct import ValidationError
 from langcodes import Language, closest_match
 from pymp4.parser import Box
@@ -23,6 +22,7 @@ from unidecode import unidecode
 
 from devine.core.config import config
 from devine.core.constants import LANGUAGE_MAX_DISTANCE
+from devine.core.sessions import RequestsSession, ServiceSession
 
 
 def rotate_log_file(log_path: Path, keep: int = 20) -> Path:
@@ -189,14 +189,14 @@ def ap_case(text: str, keep_spaces: bool = False, stop_words: tuple[str] = None)
     ])
 
 
-def get_ip_info(session: Optional[requests.Session] = None) -> dict:
+def get_ip_info(session: Optional[ServiceSession] = None) -> dict:
     """
     Use ipinfo.io to get IP location information.
 
-    If you provide a Requests Session with a Proxy, that proxies IP information
+    If you provide a Service Session with a Proxy, that proxies IP information
     is what will be returned.
     """
-    return (session or requests.Session()).get("https://ipinfo.io/json").json()
+    return (session or RequestsSession()).get("https://ipinfo.io/json").json()
 
 
 def time_elapsed_since(start: float) -> str:

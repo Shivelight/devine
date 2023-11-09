@@ -22,7 +22,6 @@ from langcodes import Language, tag_is_valid
 from lxml.etree import Element
 from pywidevine.cdm import Cdm as WidevineCdm
 from pywidevine.pssh import PSSH
-from requests import Session
 from requests.cookies import RequestsCookieJar
 from rich import filesize
 
@@ -30,6 +29,7 @@ from devine.core.constants import AnyTrack
 from devine.core.downloaders import downloader
 from devine.core.downloaders import requests as requests_downloader
 from devine.core.drm import Widevine
+from devine.core.sessions import RequestsSession, ServiceSession
 from devine.core.tracks import Audio, Subtitle, Tracks, Video
 from devine.core.utilities import is_close_match, try_ensure_utf8
 from devine.core.utils.xml import load_xml
@@ -51,16 +51,16 @@ class DASH:
         self.url = url
 
     @classmethod
-    def from_url(cls, url: str, session: Optional[Session] = None, **args: Any) -> DASH:
+    def from_url(cls, url: str, session: Optional[ServiceSession] = None, **args: Any) -> DASH:
         if not url:
             raise requests.URLRequired("DASH manifest URL must be provided for relative path computations.")
         if not isinstance(url, str):
             raise TypeError(f"Expected url to be a {str}, not {url!r}")
 
         if not session:
-            session = Session()
-        elif not isinstance(session, Session):
-            raise TypeError(f"Expected session to be a {Session}, not {session!r}")
+            session = RequestsSession()
+        elif not isinstance(session, ServiceSession):
+            raise TypeError(f"Expected session to be a {ServiceSession}, not {session!r}")
 
         res = session.get(url, **args)
         if res.url != url:
@@ -228,14 +228,14 @@ class DASH:
         stop_event: Event,
         skip_event: Event,
         progress: partial,
-        session: Optional[Session] = None,
+        session: Optional[ServiceSession] = None,
         proxy: Optional[str] = None,
         license_widevine: Optional[Callable] = None
     ):
         if not session:
-            session = Session()
-        elif not isinstance(session, Session):
-            raise TypeError(f"Expected session to be a {Session}, not {session!r}")
+            session = RequestsSession()
+        elif not isinstance(session, ServiceSession):
+            raise TypeError(f"Expected session to be a {ServiceSession}, not {session!r}")
 
         if not track.needs_proxy and proxy:
             proxy = None

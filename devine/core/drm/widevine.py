@@ -14,12 +14,12 @@ from construct import Container
 from pymp4.parser import Box
 from pywidevine.cdm import Cdm as WidevineCdm
 from pywidevine.pssh import PSSH
-from requests import Session
 from rich.text import Text
 
 from devine.core.config import config
 from devine.core.console import console
 from devine.core.constants import AnyTrack
+from devine.core.sessions import RequestsSession, ServiceSession
 from devine.core.utilities import get_binary_path, get_boxes
 from devine.core.utils.subprocess import ffprobe
 
@@ -53,7 +53,7 @@ class Widevine:
         self.data: dict = kwargs or {}
 
     @classmethod
-    def from_track(cls, track: AnyTrack, session: Optional[Session] = None) -> Widevine:
+    def from_track(cls, track: AnyTrack, session: Optional[ServiceSession] = None) -> Widevine:
         """
         Get PSSH and KID from within the Initiation Segment of the Track Data.
         It also tries to get PSSH and KID from other track data like M3U8 data
@@ -63,7 +63,7 @@ class Widevine:
         This should only be used if a PSSH could not be provided directly.
         It is *rare* to need to use this.
 
-        You may provide your own requests session to be able to use custom
+        You may provide your own service session to be able to use custom
         headers and more.
 
         Raises:
@@ -71,7 +71,7 @@ class Widevine:
             KIDNotFound - If the KID was not found within the data or PSSH.
         """
         if not session:
-            session = Session()
+            session = RequestsSession()
             session.headers.update(config.headers)
 
         kid: Optional[UUID] = None

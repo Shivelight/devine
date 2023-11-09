@@ -16,6 +16,7 @@ from devine.core.config import config
 from devine.core.console import console
 from devine.core.constants import AnyTrack
 from devine.core.credential import Credential
+from devine.core.sessions import RequestsSession, ServiceSession
 from devine.core.titles import Title_T, Titles_T
 from devine.core.tracks import Chapter, Tracks
 from devine.core.utilities import get_ip_info
@@ -80,8 +81,7 @@ class Service(metaclass=ABCMeta):
     # Otherwise, the base service code (if any) of the function will be executed on call.
     # The functions will be executed in shown order.
 
-    @staticmethod
-    def get_session() -> requests.Session:
+    def get_session(self) -> ServiceSession:
         """
         Creates a Python-requests Session, adds common headers
         from config, cookies, retry handler, and a proxy if available.
@@ -101,7 +101,7 @@ class Service(metaclass=ABCMeta):
             pool_block=True
         ))
         session.mount("http://", session.adapters["https://"])
-        return session
+        return RequestsSession(session)
 
     def authenticate(self, cookies: Optional[MozillaCookieJar] = None, credential: Optional[Credential] = None) -> None:
         """

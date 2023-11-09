@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Optional, Union
 from uuid import UUID
 
-import requests
 from langcodes import Language
 
 from devine.core.constants import TERRITORY_MAP
 from devine.core.drm import DRM_T
+from devine.core.sessions import RequestsSession, ServiceSession
 from devine.core.utilities import get_binary_path, get_boxes
 from devine.core.utils.subprocess import ffprobe
 
@@ -136,7 +136,7 @@ class Track:
         maximum_size: int = 20000,
         url: Optional[str] = None,
         byte_range: Optional[str] = None,
-        session: Optional[requests.Session] = None
+        session: Optional[ServiceSession] = None
     ) -> bytes:
         """
         Get the Track's Initial Segment Data Stream.
@@ -161,7 +161,7 @@ class Track:
             session: Session context, e.g., authorization and headers.
         """
         if not session:
-            session = requests.Session()
+            session = RequestsSession()
 
         if self.descriptor != self.Descriptor.URL and not url:
             # We cannot know which init map from the HLS or DASH playlist is actually used.
