@@ -55,9 +55,9 @@ class ServiceSession(metaclass=ABCMeta):
 
 
 class RequestsSession(ServiceSession):
-    """Requests Service Session."""
+    """Service Session for requests and requests-like libraries."""
 
-    def __init__(self, session: requests.Session):
+    def __init__(self, session: Union[requests.Session, Any] = None):
         self.session = session or requests.Session()
 
     @property
