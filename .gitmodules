@@ -2,3 +2,4 @@
 	path = devine/services
 	url = git@github.com:Shivelight/devine-services.git
 	branch = main
+    ignore = dirty
